@@ -21,11 +21,11 @@ const io = new Server(server, {
 */
 
 app.get("/", (req, res) => {
-  // console.log("Home Called");
   // res.send("App Initialised");
   res.sendFile(__dirname + "/index.html");
 });
 
+// Main Socket Logic
 io.on("connection", (socket) => {
   // console.log(socket.id);
   console.log("a user connected: ", socket.id);
