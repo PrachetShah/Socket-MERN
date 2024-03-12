@@ -1,9 +1,16 @@
 const http = require("http");
 const express = require("express");
+const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = require("socket.io")(server, {
+const PORT = 5000;
+
+const io = new Server(server);
+
+/*
+For React
+const io = new Server(server, {
   cors: {
     origin: "http://localhost:3000",
     methods: ["GET", "POST"],
@@ -11,46 +18,18 @@ const io = require("socket.io")(server, {
     credentials: true,
   },
 });
-const { addUser, removeUser } = require("./user");
+*/
 
-const PORT = 5000;
-
-io.on("connection", (socket) => {
-  // When user joins a room
-  socket.on("join", ({ name, room }, callBack) => {
-    const { user, error } = addUser({ id: socket.id, name, room });
-    if (error) return callBack(error);
-
-    socket.join(user.room);
-    socket.emit("message", {
-      user: "Admin",
-      text: `Welocome to ${user.room}`,
-    });
-
-    socket.broadcast
-      .to(user.room)
-      .emit("message", { user: "Admin", text: `${user.name} has joined!` });
-    callBack(null);
-
-    // Sending Message
-    socket.on("sendMessage", ({ message }) => {
-      io.to(user.room).emit("message", {
-        user: user.name,
-        text: message,
-      });
-    });
-  });
-
-  // Disconnect
-  socket.on("disconnect", () => {
-    const user = removeUser(socket.id);
-    console.log(user);
-    io.to(user.room).emit("message", {
-      user: "Admin",
-      text: `${user.name} just left the room`,
-    });
-    console.log("A disconnection has been made");
-  });
+app.get("/", (req, res) => {
+  console.log("Home Called");
+  // res.send("App Initialised");
+  res.sendFile(__dirname + "/index.html");
 });
 
-server.listen(PORT, () => console.log(`Server is Quannected to Port ${PORT}`));
+io.on("connection", (socket) => {
+  console.log("User Connected");
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is Connected to Port ${PORT}`);
+});
